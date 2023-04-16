@@ -1,7 +1,11 @@
 import Head from "next/head";
 import { useState } from "react";
 import styles from "./index.module.css";
+import MarkdownIt from "markdown-it";
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+// import { dark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
+const md = new MarkdownIt();
 export default function Home() {
   const [messages, setMessages] = useState([])
   const [question, setQuestion] = useState("");
@@ -53,6 +57,35 @@ export default function Home() {
     setQuestion(value)
   }
 
+  const renderMarkdown = (content) => {
+    const contents = content.split('```');
+    const results = [];
+    let inCode = false
+    contents.forEach((item, index) => {
+      console.log(inCode, item)
+      if (inCode) {
+        results.push(
+          <SyntaxHighlighter
+            showLineNumbers={true}
+            startingLineNumber={0}
+            // language={this.props.lang}
+            // style={dark}
+            lineNumberStyle={{ color: '#ddd', fontSize: 14 }}
+          // wrapLines={true}
+          // lineProps={(num) => { console.log(num) }}
+          >
+            {item}
+          </SyntaxHighlighter>
+        )
+      } else {
+        results.push(<div dangerouslySetInnerHTML={{ __html: md.render(item) }}></div>)
+      }
+      inCode = !inCode;
+    })
+
+    return results
+  }
+
   return (
     <div>
       <Head>
@@ -79,7 +112,9 @@ export default function Home() {
         <div className={styles.result} id="result-box">{
           messages.map(message => {
             return <div className={styles.resultItem}>
-              <div className={message.role === 'user' ? styles.user : styles.assistant}>{message.content}</div>
+              <div className={message.role === 'user' ? styles.user : styles.assistant}>
+                <div>{renderMarkdown(message.content)}</div>
+              </div>
             </div>
           })
         }</div>
