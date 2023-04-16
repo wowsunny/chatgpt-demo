@@ -3,18 +3,28 @@ import { useState } from "react";
 import styles from "./index.module.css";
 
 export default function Home() {
-  const [animalInput, setAnimalInput] = useState("");
-  const [result, setResult] = useState();
+  const [messages, setMessages] = useState([])
+  const [question, setQuestion] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function onSubmit(event) {
     event.preventDefault();
     try {
+      if (!question) {
+        alert('请输入问题~')
+        return;
+      }
+      setLoading(true);
+      const newMessage = [...messages, { "role": "user", "content": question }]
+      setMessages(messages => {
+        return newMessage
+      })
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ animal: animalInput }),
+        body: JSON.stringify({ messages: newMessage }),
       });
 
       const data = await response.json();
@@ -22,13 +32,25 @@ export default function Home() {
         throw data.error || new Error(`Request failed with status ${response.status}`);
       }
 
-      setResult(data.result);
-      setAnimalInput("");
+      setMessages(messages => {
+        return [...messages, { "role": "assistant", "content": data.result }]
+      })
+      setQuestion("");
+
+      const resultBox = document.getElementById('result-box');
+      resultBox.scrollTop = resultBox.scrollHeight;
+      setLoading(false);
     } catch (error) {
       // Consider implementing your own error handling logic here
       console.error(error);
+      setLoading(false);
       alert(error.message);
     }
+  }
+
+  const handleInput = (e) => {
+    const value = e.target.value;
+    setQuestion(value)
   }
 
   return (
@@ -47,12 +69,20 @@ export default function Home() {
             type="text"
             name="animal"
             placeholder="请输入你的问题"
-            value={animalInput}
-            onChange={(e) => setAnimalInput(e.target.value)}
+            value={question}
+            onChange={handleInput}
+            disabled={loading}
+            className={loading ? styles.disabled : ''}
           />
-          <input type="submit" value="点击提问" />
+          <input type="submit" disabled={loading} className={loading ? styles.disabled : ''} value="点击提问" />
         </form>
-        <div className={styles.result}>{result}</div>
+        <div className={styles.result} id="result-box">{
+          messages.map(message => {
+            return <div className={styles.resultItem}>
+              <div className={message.role === 'user' ? styles.user : styles.assistant}>{message.content}</div>
+            </div>
+          })
+        }</div>
       </main>
     </div>
   );
