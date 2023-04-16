@@ -71,7 +71,7 @@ export default function Home() {
             // language={this.props.lang}
             // style={dark}
             lineNumberStyle={{ color: '#ddd', fontSize: 14 }}
-          // wrapLines={true}
+            wrapLines={true}
           // lineProps={(num) => { console.log(num) }}
           >
             {item}
