@@ -41,8 +41,11 @@ export default function Home() {
       })
       setQuestion("");
 
-      const resultBox = document.getElementById('result-box');
-      resultBox.scrollTop = resultBox.scrollHeight;
+      setTimeout(() => {
+        const resultBox = document.getElementById('result-box');
+        resultBox.scrollTop = resultBox.scrollHeight;
+      }, 100)
+
       setLoading(false);
     } catch (error) {
       // Consider implementing your own error handling logic here
@@ -62,7 +65,6 @@ export default function Home() {
     const results = [];
     let inCode = false
     contents.forEach((item, index) => {
-      console.log(inCode, item)
       if (inCode) {
         results.push(
           <SyntaxHighlighter
@@ -98,7 +100,7 @@ export default function Home() {
         <h3>hello chatGpt</h3>
         <p>使用chatGPT 3.5驱动</p>
         <form onSubmit={onSubmit}>
-          <input
+          <textarea
             type="text"
             name="animal"
             placeholder="请输入你的问题"
