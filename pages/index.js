@@ -63,20 +63,22 @@ export default function Home() {
   const renderMarkdown = (content) => {
     const contents = content.split('```');
     const results = [];
-    let inCode = false
+    let inCode = false;
     contents.forEach((item, index) => {
+      const reg = /^(python|javascript|c\+\+|java|c)(?=\n)/
+      const language = item.match(reg)?.[1];
       if (inCode) {
         results.push(
           <SyntaxHighlighter
             showLineNumbers={true}
             startingLineNumber={0}
-            // language={this.props.lang}
+            language={language}
             // style={dark}
             lineNumberStyle={{ color: '#ddd', fontSize: 14 }}
             wrapLines={true}
           // lineProps={(num) => { console.log(num) }}
           >
-            {item}
+            {item.replace(reg, '')}
           </SyntaxHighlighter>
         )
       } else {
