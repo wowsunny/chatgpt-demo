@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./index.module.css";
 import MarkdownIt from "markdown-it";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -10,6 +10,30 @@ export default function Home() {
   const [messages, setMessages] = useState([])
   const [question, setQuestion] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const handleLogin = async () => {
+    const password = window.prompt('请输入密码')
+    try {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password }),
+      });
+      if (response.status !== 200) {
+        alert('登录失败')
+        return;
+      }
+      window.location.reload()
+    } catch (e) {
+      alert(e.message)
+    }
+  }
+
+  // useEffect(async () => {
+  //   handleLogin();
+  // }, [])
 
   async function onSubmit(event) {
     event.preventDefault();
@@ -32,6 +56,10 @@ export default function Home() {
       });
 
       const data = await response.json();
+      if (response.status === 401) {
+        handleLogin();
+        return;
+      }
       if (response.status !== 200) {
         throw data.error || new Error(`Request failed with status ${response.status}`);
       }

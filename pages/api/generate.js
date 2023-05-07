@@ -1,4 +1,5 @@
 import { Configuration, OpenAIApi } from "openai";
+import { checkIfUserIsLoggedIn } from '../components/jwt';
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
@@ -6,6 +7,17 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 export default async function (req, res) {
+  // 检查用户是否已经登录
+  const isLoggedIn = checkIfUserIsLoggedIn(req);
+  if (!isLoggedIn) {
+    res.status(401).json({
+      error: {
+        message: "Unauthorized: Please login to access this resource.",
+      },
+    });
+    return;
+  }
+
   if (!configuration.apiKey) {
     res.status(500).json({
       error: {
